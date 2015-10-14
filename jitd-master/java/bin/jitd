@@ -1,0 +1,8 @@
+#!/bin/bash
+
+ME=$(dirname $0)/..
+
+JARFILES=$(echo $ME/lib/*.jar | tr ' ' ':')
+CLASSPATH=$ME/build:$JARFILES:$ME
+java -cp $CLASSPATH jitd.Driver $*
+# -Xmx12g

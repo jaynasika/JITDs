@@ -1,0 +1,13 @@
+18:45:16.773 [main] INFO  - Load: 10000 records
+18:45:16.780 [main] INFO  - Read for: 5910--6910
+18:45:16.783 [main] INFO  - READ (1): 2963 us
+BNode(5910
+  SubArray(0, 5886, Array(1635...[9998 more]...8987)), 
+  BNode(6910
+    SubArray(5886, 996, Array(1635...[9998 more]...8987)), 
+    SubArray(6882, 3118, Array(1635...[9998 more]...8987)), 
+  ), 
+)
+18:45:16.785 [main] INFO  - Read for: 3466--4466
+18:45:16.785 [main] INFO  - READ (2): 677 us
+18:45:16.786 [main] INFO  - Total Time: 3640
