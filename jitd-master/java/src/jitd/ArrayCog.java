@@ -194,6 +194,16 @@ public class ArrayCog extends Cog
     }
     public long getKey() { return keys[i]; }
     public long getValue() { return values[i]; }
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   public String toString()

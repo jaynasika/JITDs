@@ -82,6 +82,16 @@ public class BufferCog extends Cog
     }
     public long getKey() { return curr.keys[i]; }
     public long getValue() { return curr.values[i]; }
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   protected static class Block {

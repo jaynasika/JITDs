@@ -8,7 +8,7 @@ import re
 count=0;
 values = [];
 index = [];
-with open('/home/jayanth/workspace/jitd/jitd-master/java/bin/results/demo_1.out') as fp:
+with open('/home/bade/workspace/JITDs/jitd-master/java/bin/results/1g_cracker_1pctwrite.out') as fp:
     for line in fp:
         #m = re.search('.*READ \(\d+\)',line)
         m = re.search('(?<=READ \()\w+',line)

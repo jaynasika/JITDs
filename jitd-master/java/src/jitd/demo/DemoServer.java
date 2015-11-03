@@ -123,7 +123,7 @@ public class DemoServer {
     HttpServer server = HttpServer.create(addr, 0);
     
     final ScriptDriver sd = new ScriptDriver();
-    sd.init(1);
+    sd.init(1,null);
     
     server.createContext("/", new HttpHandler() {
       public void handle(HttpExchange x) throws IOException {
@@ -146,7 +146,7 @@ public class DemoServer {
               case "/init":
                 sd.init(args.containsKey("size") 
                             ? Integer.parseInt(args.get("size")) 
-                            : 1000
+                            : 1000, null
                        );
                 sd.resetLog();
                 success(x);

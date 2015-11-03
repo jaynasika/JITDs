@@ -1,3 +1,4 @@
 mode cracker
+splayInterval 100
 init 10000000 zipf
 seqread 5000

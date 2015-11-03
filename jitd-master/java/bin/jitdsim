@@ -3,8 +3,8 @@
 ME=$(dirname $0)/..
 
 JARFILES=$(echo $ME/lib/*.jar | tr ' ' ':')
-CLASSPATH=/home/jayanth/workspace/jitd/bin:$JARFILES:$ME
-java -Xmx1g -cp $CLASSPATH jitd.ScriptDriver $* | tee results/$(basename $1 .sim).out
+CLASSPATH=/home/bade/workspace/JITDs/bin:$JARFILES:$ME
+java -Xmx5g -Xss200m -cp $CLASSPATH jitd.ScriptDriver $* | tee results/$(basename $1 .sim).out
 
 #-Xmx100g \
 #-XX:NewSize=40g \

@@ -12,6 +12,8 @@ public abstract class KeyValueIterator
   public abstract long getKey();
   public abstract long getValue();
   public abstract boolean next();
+  public abstract long randKey();
+  public abstract void setSeed(int seed);
   
   public static class FilteredIterator extends KeyValueIterator {
     long low, high;
@@ -35,6 +37,18 @@ public abstract class KeyValueIterator
     
     public long getKey() { return source.getKey(); }
     public long getValue() { return source.getValue(); }
+
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   public static class EmptyIterator extends KeyValueIterator {
@@ -42,6 +56,16 @@ public abstract class KeyValueIterator
     public boolean next() { return false; }
     public long getKey() { return 0; }
     public long getValue() { return 0; }
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   public static class SingletonIterator extends KeyValueIterator {
@@ -55,6 +79,18 @@ public abstract class KeyValueIterator
     public boolean next() { if(nextCalled) { return false; } nextCalled = true; return true; }
     public long getKey() { return key; }
     public long getValue() { return value; }
+
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   public static class SequenceIterator extends KeyValueIterator {
@@ -70,6 +106,18 @@ public abstract class KeyValueIterator
     
     public long getKey(){ return seq[i].getKey(); }
     public long getValue(){ return seq[i].getValue(); }
+
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   public static class SubseqIterator extends KeyValueIterator {
@@ -89,6 +137,18 @@ public abstract class KeyValueIterator
     
     public long getKey(){ return src.getKey(); }
     public long getValue(){ return src.getValue(); }
+
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
     
   }
   
@@ -96,7 +156,8 @@ public abstract class KeyValueIterator
     Integer max;
     long key, value;
     Random rand = new Random();
-    public static long KEY_RANGE = 10*1000; //1000*1000*1000*1000;
+    //public static long KEY_RANGE = 10*1000; //1000*1000*1000*1000;
+    public static long KEY_RANGE = 1*1000000; //1000*1000*1000*1000;
     
     public RandomIterator() { this.max = null; }
     public RandomIterator(int max) { this.max = new Integer(max); }
@@ -181,5 +242,58 @@ public abstract class KeyValueIterator
     
     public long getKey(){ return sources[curr].getKey(); }
     public long getValue(){ return sources[curr].getValue(); }
+
+	@Override
+	public long randKey() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
   }
+  public static class ZipfianIterator extends KeyValueIterator {
+		Integer max;
+		long key, value;
+		ZipfianGenerator zipfRand = new ZipfianGenerator();
+		public static long KEY_RANGE = 1000000; //1000*1000*1000*1000;
+
+		public ZipfianIterator() { 
+			//-- Not Allowed --//			
+		}
+		public ZipfianIterator(int max) { 
+			this.max = new Integer(max);
+			zipfRand = new ZipfianGenerator(max);
+		}
+
+		public static long coerceToKeyRange(long rnd)
+		{
+			return Math.abs(rnd) % KEY_RANGE;
+		}
+
+		public long randKey()
+		{
+			return coerceToKeyRange(zipfRand.nextLong());
+		}
+		public void setSeed(int seed)
+	    {
+	      zipfRand.setSeed(seed);
+	    }
+
+		public boolean next() { 
+			if(max != null){
+				if(max <= 0) { return false; }
+				max = max - 1;
+			}
+			key = coerceToKeyRange(zipfRand.nextLong());
+			value = zipfRand.nextLong(); 
+			return true; 
+		}
+		public long getKey() { return key; }
+		public long getValue() { return value; }
+
+	}
 }
