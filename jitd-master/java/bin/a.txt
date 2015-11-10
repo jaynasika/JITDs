@@ -1,3 +1,17 @@
 sh /home/bade/workspace/JITDs/jitd-master/java/bin/jitdsim /home/bade/workspace/JITDs/tests/1g_cracker_1pctwrite.sim 2>a.txt
 
  vi results/1g_cracker_1pctwrite.out
+ 
+ 
+					//System.out.println("Before Splaying root sep is : " + ((BTreeCog)driver.root).sep);
+					//System.out.println("Current depth : " + SplayBST.getDepth(driver.root, 0));
+					long startsplaytime = System.nanoTime();					
+					driver.root = SplayBST.splayTheCog(driver.root,randkey);
+					long endsplaytime = System.nanoTime();
+					totalSplayTime = totalSplayTime + (endsplaytime - startsplaytime);
+					//System.out.println(delta + " microsecs for splay!");
+					/*if (driver.root instanceof BTreeCog) {
+        		System.out.println("After splay root sep is : " + ((BTreeCog)driver.root).sep);
+        		System.out.println("After depth : " + SplayBST.getDepth(driver.root, 0));
+        	}
+        	//SplayBST.print("", true, driver.root); */

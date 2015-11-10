@@ -1,9 +1,7 @@
 package jitd;
 
-import java.util.Scanner;
-
 public class SplayBST {
-
+	public static int inorderNodeIndex = 0;
 
 	/***************************************************************************
 	 * Splay tree function.
@@ -85,80 +83,6 @@ public class SplayBST {
 		return h;
 	}
 
-	// test client
-	public static void main(String[] args) {
-		ArrayCog sixtyarraycog = new ArrayCog(3);
-		sixtyarraycog.keys[0] = 55;
-		sixtyarraycog.keys[1] = 57;
-		sixtyarraycog.keys[2] = 58;
-		Cog sixty = new BTreeCog(60, sixtyarraycog, null);
-
-		ArrayCog eightyarraycog = new ArrayCog(2);
-		eightyarraycog.keys[0] = 87;
-		eightyarraycog.keys[1] = 89;
-		Cog eighty = new BTreeCog(80, null, eightyarraycog);
-		Cog seventy = new BTreeCog(70, sixty, eighty);
-
-		ArrayCog fortyarraycog = new ArrayCog(3);
-		fortyarraycog.keys[0] = 35;
-		fortyarraycog.keys[1] = 39;
-		fortyarraycog.keys[2] = 40;
-		Cog fourty = new BTreeCog(40, fortyarraycog, null);
-
-		Cog fifty = new BTreeCog(50, fourty, seventy);
-
-		ArrayCog twentyarraycog = new ArrayCog(3);
-		twentyarraycog.keys[0] = 13;
-		twentyarraycog.keys[1] = 15;
-		twentyarraycog.keys[2] = 17;
-		Cog twenty = new BTreeCog(20, twentyarraycog, null);
-
-		Cog thirty = new BTreeCog(30, twenty, fifty);
-
-		ArrayCog hundredarraycog = new ArrayCog(3);
-		hundredarraycog.keys[0] = 98;
-		hundredarraycog.keys[1] = 99;
-		hundredarraycog.keys[2] = 100;
-		Cog hundred = new BTreeCog(100, hundredarraycog, null);
-
-		Cog ninety = new BTreeCog(90, thirty, hundred);
-
-		ArrayCog zeroarraycog = new ArrayCog(3);
-		zeroarraycog.keys[0] = -1;
-		zeroarraycog.keys[1] = -2;
-		zeroarraycog.keys[2] = -3;
-		Cog zero = new BTreeCog(0, zeroarraycog, null);
-
-		Cog ten = new BTreeCog(10, zero, ninety);
-
-		ArrayCog onetwentyarraycogleft = new ArrayCog(2);
-		onetwentyarraycogleft.keys[0] = 114;
-		onetwentyarraycogleft.keys[1] = 115;
-		ArrayCog onetwentyarraycogright = new ArrayCog(2);
-		onetwentyarraycogright.keys[0] = 125;
-		onetwentyarraycogright.keys[1] = 126;
-		Cog onetwenty = new BTreeCog(120, onetwentyarraycogleft, onetwentyarraycogright);
-
-		Cog cog = new BTreeCog(110, ten, onetwenty);
-
-		System.out.println("Before splay:\n");
-		SplayBST.print("",true,(BTreeCog)cog);
-		Scanner in = new Scanner(System.in);
-		boolean inLoop = true;
-		while(inLoop) {
-			System.out.println("Enter the splay element or (Enter -t to terminate)");
-			String a = in.nextLine();
-			if (!a.equals("-t")) {
-				long splayElement = Long.parseLong(a);
-				cog = SplayBST.splayTheCog(cog, splayElement);
-				System.out.println("After splay on " + splayElement + ":\n");
-				SplayBST.print("",true,cog);
-			} else {
-				inLoop = false;				
-			}
-		}
-		System.out.println("terminated");
-	}
 	public static void print(String prefix, boolean isTail, Cog cog) {
 		if (cog != null) {
 			if (cog instanceof BTreeCog) {
@@ -166,24 +90,50 @@ public class SplayBST {
 
 				print(prefix + (isTail ? "    " : "│   "), false, ((BTreeCog)cog).lhs);
 				print(prefix + (isTail ? "    " : "│   "), false, ((BTreeCog)cog).rhs);
-			} else if (cog instanceof ArrayCog) {
-				System.out.println(prefix + (isTail ? "└── " : "├── ") + ((ArrayCog)cog).toString());			
-			} else if (cog instanceof LeafCog) {
-				System.out.println(prefix + (isTail ? "└── " : "├── ") + ((LeafCog)cog).toString());
 			} else {
 				System.out.println(prefix + (isTail ? "└── " : "├── ") + cog.toString());
 			}			
 		}
 	}
-	public static int getDepth(Cog cog, int depth) {
+
+	public static int getDepth(Cog cog) {
+		int depth = 0;
 		if (cog != null) {
+			depth = 1;
 			if (cog instanceof BTreeCog) {
-				depth = Math.max(getDepth(((BTreeCog)cog).lhs, depth + 1),
-						getDepth(((BTreeCog)cog).rhs, depth + 1));
-			} else {
-				depth = depth + 1;			
-			}		
+				depth = depth + Math.max(getDepth(((BTreeCog)cog).lhs),
+						getDepth(((BTreeCog)cog).rhs));
+			}
 		}
 		return depth;
 	}
+
+	public static int getBTreeNodesCount(Cog cog) {
+		if (cog != null && cog instanceof BTreeCog) {
+			return getBTreeNodesCount(((BTreeCog)cog).lhs)
+					+ getBTreeNodesCount(((BTreeCog)cog).rhs)
+					+ 1;
+		}
+
+		return 0;		
+	}
+
+	public static Long findMedianKey(Cog cog) {
+		int n = getBTreeNodesCount(cog);
+		Long med = findMedianBTreeSeperator(cog, n);
+		inorderNodeIndex = 0;
+		return med;	   
+	}
+
+	public static Long findMedianBTreeSeperator(Cog cog, int n) {
+		if(cog != null && cog instanceof BTreeCog) {
+			Long med = findMedianBTreeSeperator(((BTreeCog)cog).lhs, n);
+			if (med != null) return med;
+			if (inorderNodeIndex == n/2) return ((BTreeCog)cog).sep;
+			inorderNodeIndex++;
+			return findMedianBTreeSeperator(((BTreeCog)cog).rhs, n);
+		}			
+		return null;
+	}
+
 }

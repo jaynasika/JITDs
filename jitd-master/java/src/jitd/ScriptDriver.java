@@ -17,10 +17,11 @@ public class ScriptDriver {
 
 	private static Logger log = 
 			org.apache.logging.log4j.LogManager.getLogger();
-
+	public StringBuffer graphString = new StringBuffer();
 	public Driver driver = new Driver(new Mode(), null);
 	boolean fixedMode = false;
 	int splayInterval = -1;
+	long totalSplayTime = 0;
 	KeyValueIterator rand;
 	//KeyValueIterator.RandomIterator rand = new KeyValueIterator.RandomIterator();
 	//KeyValueIterator.ZipfianIterator rand = new KeyValueIterator.ZipfianIterator();
@@ -52,9 +53,12 @@ public class ScriptDriver {
 				(distributionMode.equalsIgnoreCase("zipf"))) {
 			System.out.println("zipfian initiated");
 			rand = new KeyValueIterator.ZipfianIterator(baseSize);
+			graphString.append("zipf_");
 		} else {
 			rand = new KeyValueIterator.RandomIterator(baseSize);
+			graphString.append("random_");
 		}		
+		graphString.append(baseSize + "_");
 		driver.root = array(baseSize);
 	}
 
@@ -65,6 +69,7 @@ public class ScriptDriver {
 		startTime();
 		driver.insert(cog);
 		endTime(LogType.WRITE);
+		graphString.append("write" + writeSize + "_");
 	}
 
 	public long randKey()
@@ -93,20 +98,16 @@ public class ScriptDriver {
 
 	public void seqRead(int count, long width)
 	{
-		// System.out.println("Hi read");
 		if (splayInterval > -1) {
 			for(int i = 0; i < count; i++) {
 				long randkey =randKey();    	
 				read(randkey);
 				if(i>0 && i%splayInterval==0){
-					System.out.println("Before Splaying root sep is : " + ((BTreeCog)driver.root).sep);
-					//System.out.println("Current depth : " + SplayBST.getDepth(driver.root, 0));
-					driver.root = SplayBST.splayTheCog(driver.root,randkey);
-					/*if (driver.root instanceof BTreeCog) {
-        		System.out.println("After splay root sep is : " + ((BTreeCog)driver.root).sep);
-        		System.out.println("After depth : " + SplayBST.getDepth(driver.root, 0));
-        	}
-        	//SplayBST.print("", true, driver.root); */
+					long startsplaytime = System.nanoTime();
+					long key = SplayBST.findMedianKey(driver.root);
+					driver.root = SplayBST.splayTheCog(driver.root,key);
+					long endsplaytime = System.nanoTime();
+					totalSplayTime = totalSplayTime + (endsplaytime - startsplaytime);
 				}    
 			}
 		} else {
@@ -115,6 +116,8 @@ public class ScriptDriver {
 				read(randkey);
 			}
 		}
+		graphString.append("seqRead_");
+		graphString.append(count);
 	}
 
 	public Mode modeForString(String mode){
@@ -134,6 +137,7 @@ public class ScriptDriver {
 	public void setMode(String mode)
 	{
 		if(fixedMode){ return; }
+		graphString.append(mode + "_");
 		driver.mode = modeForString(mode);
 	}
 
@@ -155,6 +159,7 @@ public class ScriptDriver {
 
 	public void setSplayInterval(int splayInterval) {
 		this.splayInterval = splayInterval;
+		graphString.append("splayAt_" + splayInterval + "_");
 	}
 
 	public void exec(String cmd)
@@ -243,7 +248,6 @@ public class ScriptDriver {
 		GetArgs args = new GetArgs(argString);
 		String arg;
 		ScriptDriver sd = new ScriptDriver();
-		System.out.println("hi");
 		while((arg = args.nextArg()) != null){
 			log.trace("Arg: {}", arg);
 			switch(arg){
@@ -263,12 +267,13 @@ public class ScriptDriver {
 				sd.execStream(new FileReader(file));
 			}
 		}
-		avgAndWriteToFile(sd.timeLog, 30);
+		avgAndWriteToFile(sd.timeLog, 10, sd.graphString.toString() + "_" + sd.timer);
 		log.info("Total Time: {}", sd.timer);
+		//System.out.println("Total splay time in microsecs : " + sd.totalSplayTime/1000);
 
 		//sd.dump();
 	}
-	public static void avgAndWriteToFile(List<LogEntry> timelog, int avgFindingInterval) {
+	public static void avgAndWriteToFile(List<LogEntry> timelog, int avgFindingInterval, String filename) {
 		long subsetSum = 0;
 		double avg = 0.0;
 		Map<Integer,Double> timeIntervalToAvgTimeTaken = new TreeMap<>();
@@ -284,7 +289,8 @@ public class ScriptDriver {
 		}	
 
 		try {			
-			File file = new File("/home/bade/workspace/JITDs/jitd-master/java/bin/avgVals.out");
+			File file = new File("/home/bade/workspace/JITDs/jitd-master/java/bin/" 
+					+ filename + ".out");
 
 			// if file doesnt exists, then create it 
 			if (!file.exists()) {
@@ -297,7 +303,14 @@ public class ScriptDriver {
 				bw.newLine();
 			}
 			bw.close();
-
+			System.out.println(file.getAbsolutePath());
+			/*String[] cmd = new String[3];
+			cmd[0] = "run";
+			cmd[1] = "/home/bade/workspace/JITDs/avgPlot.py" ;
+			String s = "/home/bade/workspace/JITDs/jitd-master/java/bin/" + filename + ".out";
+			cmd[2] = s;
+			ProcessBuilder builder = new ProcessBuilder(cmd);
+			Process p = builder.start();*/
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
