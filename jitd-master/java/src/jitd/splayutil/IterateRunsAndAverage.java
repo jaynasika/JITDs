@@ -1,4 +1,4 @@
-package jitd.automate;
+package jitd.splayutil;
 import java.io.*;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 import jitd.ScriptDriver;
 
-public class automateResults {
+public class IterateRunsAndAverage {
 
 	public static void main(String args[]) throws InterruptedException {
 		final int numOfIterations = 10;

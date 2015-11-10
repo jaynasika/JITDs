@@ -23,8 +23,6 @@ public class ScriptDriver {
 	int splayInterval = -1;
 	long totalSplayTime = 0;
 	KeyValueIterator rand;
-	//KeyValueIterator.RandomIterator rand = new KeyValueIterator.RandomIterator();
-	//KeyValueIterator.ZipfianIterator rand = new KeyValueIterator.ZipfianIterator();
 	long timer = 0, start = 0;
 	int op = 0;
 
@@ -51,7 +49,6 @@ public class ScriptDriver {
 		log.info("Load: {} records", baseSize);
 		if ((distributionMode != null) &&
 				(distributionMode.equalsIgnoreCase("zipf"))) {
-			System.out.println("zipfian initiated");
 			rand = new KeyValueIterator.ZipfianIterator(baseSize);
 			graphString.append("zipf_");
 		} else {
@@ -267,7 +264,7 @@ public class ScriptDriver {
 				sd.execStream(new FileReader(file));
 			}
 		}
-		avgAndWriteToFile(sd.timeLog, 10, sd.graphString.toString() + "_" + sd.timer);
+		//avgAndWriteToFile(sd.timeLog, 10, sd.graphString.toString() + "_" + sd.timer);
 		log.info("Total Time: {}", sd.timer);
 		//System.out.println("Total splay time in microsecs : " + sd.totalSplayTime/1000);
 
@@ -304,13 +301,6 @@ public class ScriptDriver {
 			}
 			bw.close();
 			System.out.println(file.getAbsolutePath());
-			/*String[] cmd = new String[3];
-			cmd[0] = "run";
-			cmd[1] = "/home/bade/workspace/JITDs/avgPlot.py" ;
-			String s = "/home/bade/workspace/JITDs/jitd-master/java/bin/" + filename + ".out";
-			cmd[2] = s;
-			ProcessBuilder builder = new ProcessBuilder(cmd);
-			Process p = builder.start();*/
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
