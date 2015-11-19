@@ -32,7 +32,7 @@ public class SplayTest {
 				inLoop = false;				
 			}
 		}
-		System.out.println("terminated");
+		System.out.println("terminated");		
 	}
 
 	private static Cog makeSampleCog() {

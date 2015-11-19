@@ -8,6 +8,7 @@ public class CrackerMode extends Mode
     org.apache.logging.log4j.LogManager.getLogger();
 
   public static boolean allowInPlace = true;
+  public int sepratorCount = 0;
 
   public KeyValueIterator scan(Driver driver, long low, long high)
   {
@@ -237,7 +238,8 @@ public class CrackerMode extends Mode
           i--;
         }
       }
-      
+      sepratorCount++;
+      sepratorCount++;
       return new BTreeCog(low,
         new SubArrayCog(acog, lowIdx, lowRadixPos-lowIdx),
         new BTreeCog(high,
@@ -283,7 +285,8 @@ public class CrackerMode extends Mode
       }
       
       assert(midIdx == highIdx+1);
-      
+      sepratorCount++;
+      sepratorCount++;
       return new BTreeCog(low,
         new SubArrayCog(out, 0, lowIdx),
         new BTreeCog(high,
@@ -340,7 +343,7 @@ public class CrackerMode extends Mode
           radixPos++;
         }
       }
-      
+      sepratorCount++;
       return new BTreeCog(val, 
         new SubArrayCog(acog, low, radixPos - low),
         new SubArrayCog(acog, radixPos, high - radixPos)
@@ -373,7 +376,7 @@ public class CrackerMode extends Mode
       }
       
       assert(lowIdx == highIdx+1);
-      
+      sepratorCount++;
       return new BTreeCog(val,
         new SubArrayCog(out, 0, lowIdx),
         new SubArrayCog(out, highIdx+1, out.length() - highIdx -1)

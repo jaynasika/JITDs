@@ -49,10 +49,10 @@ public class ScriptDriver {
 		log.info("Load: {} records", baseSize);
 		if ((distributionMode != null) &&
 				(distributionMode.equalsIgnoreCase("zipf"))) {
-			rand = new KeyValueIterator.ZipfianIterator(baseSize);
+			rand = new KeyValueIterator.ZipfianIterator();
 			graphString.append("zipf_");
 		} else {
-			rand = new KeyValueIterator.RandomIterator(baseSize);
+			rand = new KeyValueIterator.RandomIterator();
 			graphString.append("random_");
 		}		
 		graphString.append(baseSize + "_");
@@ -101,7 +101,7 @@ public class ScriptDriver {
 				read(randkey);
 				if(i>0 && i%splayInterval==0){
 					long startsplaytime = System.nanoTime();
-					long key = SplayBST.findMedianKey(driver.root);
+					long key = SplayBST.findMedianKey(driver.root, null);
 					driver.root = SplayBST.splayTheCog(driver.root,key);
 					long endsplaytime = System.nanoTime();
 					totalSplayTime = totalSplayTime + (endsplaytime - startsplaytime);

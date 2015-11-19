@@ -4,4 +4,4 @@ ME=$(dirname $0)/..
 
 JARFILES=$(echo $ME/lib/*.jar | tr ' ' ':')
 CLASSPATH=$ME/build:$JARFILES:$ME
-java -Xmx12g -cp $CLASSPATH jitd.demo.DemoServer $*
+java -Xmx5g -Xss200m -cp $CLASSPATH jitd.demo.DemoServer $*

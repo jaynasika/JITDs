@@ -118,8 +118,10 @@ public class SplayBST {
 		return 0;		
 	}
 
-	public static Long findMedianKey(Cog cog) {
-		int n = getBTreeNodesCount(cog);
+	public static Long findMedianKey(Cog cog, Integer n) {
+		if(n == null) {
+			n = getBTreeNodesCount(cog);
+		}
 		Long med = findMedianBTreeSeperator(cog, n);
 		inorderNodeIndex = 0;
 		return med;	   
