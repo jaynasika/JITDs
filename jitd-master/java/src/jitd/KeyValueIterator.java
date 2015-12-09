@@ -259,7 +259,7 @@ public abstract class KeyValueIterator
 		Integer max;
 		long key, value;
 		ZipfianGenerator zipfRand = new ZipfianGenerator();
-		public static long KEY_RANGE = 1000000; //1000*1000*1000*1000;
+		public static long KEY_RANGE = 100000; //1000*1000*1000*1000;
 
 		public ZipfianIterator() { 
 			//-- Not Allowed --//			
