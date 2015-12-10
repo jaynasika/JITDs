@@ -1,0 +1,5 @@
+mode cracker
+splayInterval 500
+splayMethod MFA
+init 1000000 zipf
+seqread 10000

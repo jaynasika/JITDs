@@ -1,4 +1,0 @@
-mode cracker
-splayInterval 50
-init 1000000
-seqread 10000

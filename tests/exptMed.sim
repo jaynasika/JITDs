@@ -1,4 +1,5 @@
 mode cracker
 splayInterval 100
-init 1000000
+splayMethod median
+init 1000000 zipf
 seqread 10000

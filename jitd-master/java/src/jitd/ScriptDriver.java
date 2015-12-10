@@ -161,7 +161,8 @@ public class ScriptDriver {
 			readWithMFA(key, key + width);
 			if((i+1) % splayInterval == 0){					
 				long startsplaytime = System.nanoTime();
-				List<CountEntry<Long>> topk = ((CrackerMode)driver.mode).frequentItemsCounter.peek(10);
+				List<CountEntry<Long>> topk = ((CrackerMode)driver.mode).frequentItemsCounter.peek(20);
+				System.out.println(topk.size());
 				// System.out.println(topk);
 				// print the items
 				for (int indx = topk.size() - 1; indx >= 0 ; indx--) {
@@ -184,12 +185,12 @@ public class ScriptDriver {
 				if (isMedian) {
 					key = SplayBST.findMedianKey(driver.root, ((CrackerMode)driver.mode).seperatorCount);
 				}
-				System.out.println("Before splay : " + ((BTreeCog)driver.root).sep);
+				//System.out.println("Before splay : " + ((BTreeCog)driver.root).sep);
 				long startsplaytime = System.nanoTime();
 				driver.root = SplayBST.splayTheCog(driver.root,key);
 				long endsplaytime = System.nanoTime();
-				System.out.println("splay key : " + key);
-				System.out.println("After splay : " + ((BTreeCog)driver.root).sep);
+				//System.out.println("splay key : " + key);
+				//System.out.println("After splay : " + ((BTreeCog)driver.root).sep);
 				totalSplayTime += (endsplaytime - startsplaytime);
 			}    
 		}
