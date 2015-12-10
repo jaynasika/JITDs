@@ -82,8 +82,12 @@ function command(cmd, args){
     <hr/>
   <div>
     <form id="init">
-      <input type="submit" value="Initialize" onclick="command('init', [ 'size' ]); return false;" /> with 
+      <input type="submit" value="Initialize" onclick="command('init', [ 'size', 'distribution' ]); return false;" /> with 
       <input type="text" value="1000000" id="size" size=10/> random values
+      <br/><br/> following <select id="distribution" name="distribution">
+          	<option value="uniform">Uniform</option>
+            <option value="zipf">Zipfian</option>
+      </select> distribution
     </form>
   </div>
     <hr/>
@@ -118,6 +122,14 @@ function command(cmd, args){
         </td></tr>
       </table>
     </form>
+    
+    <form id="splayNow">
+   	  	 <input type="submit" value="SplayNow" onclick="command('splayNow', [ 'splayType' ]); return false;" />
+   	  	around <select id="splayType" name="splayType">
+            <option value="lowerBound">Query Lower Bound</option>
+            <option value="median">Median Element of Queries</option>
+          </select>
+      </form>
   </div>
     <hr/>
   <div>
@@ -129,7 +141,26 @@ function command(cmd, args){
       keys each
     </form>
   </div>
-    <hr/>
+   	 <hr/>   	  
+   <div>
+    <form id="splayParams">
+      <table><tr>
+        <th><font size="2.9"> Splay Interval: </font></th>
+        <td align="left"><input type="text" id="interval" name="interval" size=10 value=10 /></td>
+      </tr><tr>
+        <th align="left"><font size="2.9">Splay Element(s):</font></th>
+        <td>
+          <select id="method" name="method" onChange="command('splayParams', ['method', 'interval'])">
+          	<option value="select">--Select--</option>
+            <option value="lowerBound">Query Lower Bound</option>
+            <option value="median">Median Element of Queries</option>
+            <option value="MFA">Most Frequently Accessed Elements</option>
+          </select>
+        </td>
+      </tr>
+      </table>
+    </form>
+  </div>
 </td></tr></table>
 <div id="status" style="background-color: #cccccc; width:100\%; height: 30px; text-align: center; padding-top: 10px;">Ready...</div>
 

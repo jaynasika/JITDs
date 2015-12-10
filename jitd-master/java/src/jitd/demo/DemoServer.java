@@ -146,7 +146,7 @@ public class DemoServer {
               case "/init":
                 sd.init(args.containsKey("size") 
                             ? Integer.parseInt(args.get("size")) 
-                            : 1000, null
+                            : 1000, args.get("distribution")
                        );
                 sd.resetLog();
                 success(x);
@@ -189,6 +189,24 @@ public class DemoServer {
                         );
                 success(x);
                 break;
+              case "/splayParams":
+            	  sd.setSplayMethod(args.containsKey("method") 
+                          ? args.get("method") 
+                          : "NoSplay"
+                      );
+                  sd.setSplayInterval(args.containsKey("interval") 
+                              ? Integer.parseInt(args.get("interval")) 
+                              : -1
+                          );
+                  success(x);
+                  break;
+              case "/splayNow":
+            	  sd.splayNow(args.containsKey("splayType") 
+                          ? args.get("splayType") 
+                          : "NoSplay"
+                      );
+                  success(x);
+                  break;
               case "/mode":{
                   if(!args.containsKey("m")){
                     error(x, "No mode specified");

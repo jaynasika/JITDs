@@ -53,6 +53,16 @@ public class ScriptDriver {
 		return delta;
 	}
 
+	public long splayEndTime(LogType type) 
+	{ 
+		long end = System.nanoTime();
+		long delta = (end-start)/1000;
+		totalSplayTime += delta;
+		log.info("{} ({}): {} us", type, op, delta);
+		timeLog.add(new LogEntry(type, delta));
+		return delta;
+	}
+
 	public void init(int baseSize, String distributionMode)
 	{
 		log.info("Load: {} records", baseSize);
@@ -124,6 +134,28 @@ public class ScriptDriver {
 
 	public void seqRead(int count)
 	{ seqRead(count, READ_WIDTH); }
+	
+	public void splay(long key) {
+		op++;
+		log.info("Splay around: {}", key); 
+		startTime();
+		driver.root = SplayBST.splayTheCog(driver.root,key);
+		splayEndTime(LogType.SPLAY);
+		log.trace("New Root Is: {}", ((BTreeCog)driver.root).sep);
+	}
+	
+	// This method is used only for demo purpose to show the splay process!
+	public void splayNow(String splayMethod) {
+		long key;
+		if(splayMethod.equals("lowerBound")) {
+			key =randKey();    	
+			read(key, key + READ_WIDTH);
+			splay(key);
+		} else if(splayMethod.equals("median")) {
+			key = SplayBST.findMedianKey(driver.root, ((CrackerMode)driver.mode).seperatorCount);
+			splay(key);
+		}
+	}
 
 	public void seqRead(int count, long width)
 	{
@@ -137,7 +169,7 @@ public class ScriptDriver {
 		case "MFA":
 			//int counters = 20;
 			//double probabilityOfFailure = 0.2;
-			double support = 0.003;
+			double support = 0.03;
 			double maxError = 0.003;
 			((CrackerMode)driver.mode).frequentItemsCounter = new LossyCounting<Long>(maxError);
 			seqReadSplayWithMFA(count, width, support);
@@ -159,8 +191,7 @@ public class ScriptDriver {
 		for(int i = 0; i < count; i++) {
 			long key = randKey();
 			readWithMFA(key, key + width);
-			if((i+1) % splayInterval == 0){					
-				long startsplaytime = System.nanoTime();
+			if((i+1) % splayInterval == 0){	
 				List<CountEntry<Long>> topk = ((CrackerMode)driver.mode).frequentItemsCounter.peek(20);
 				System.out.println(topk.size());
 				// System.out.println(topk);
@@ -169,10 +200,8 @@ public class ScriptDriver {
 					CountEntry<Long> item = topk.get(indx);
 					// System.out.print(item.item + " ");
 					key = item.item;
-					driver.root = SplayBST.splayTheCog(driver.root,key);
-				}					
-				long endsplaytime = System.nanoTime();
-				totalSplayTime += (endsplaytime - startsplaytime);
+					splay(key);
+				}
 			}    
 		}
 	}
@@ -185,13 +214,7 @@ public class ScriptDriver {
 				if (isMedian) {
 					key = SplayBST.findMedianKey(driver.root, ((CrackerMode)driver.mode).seperatorCount);
 				}
-				//System.out.println("Before splay : " + ((BTreeCog)driver.root).sep);
-				long startsplaytime = System.nanoTime();
-				driver.root = SplayBST.splayTheCog(driver.root,key);
-				long endsplaytime = System.nanoTime();
-				//System.out.println("splay key : " + key);
-				//System.out.println("After splay : " + ((BTreeCog)driver.root).sep);
-				totalSplayTime += (endsplaytime - startsplaytime);
+				splay(key);
 			}    
 		}
 	}
@@ -311,7 +334,7 @@ public class ScriptDriver {
 
 	}
 
-	private void setSplayMethod(String splayMethod) {
+	public void setSplayMethod(String splayMethod) {
 		this.splayMethod = splayMethod;
 	}
 
@@ -398,7 +421,7 @@ public class ScriptDriver {
 
 	public final List<LogEntry> timeLog = new ArrayList<LogEntry>();
 
-	public enum LogType { READ, WRITE }
+	public enum LogType { READ, WRITE, SPLAY }
 
 	public static class LogEntry {
 		public final LogType type;
