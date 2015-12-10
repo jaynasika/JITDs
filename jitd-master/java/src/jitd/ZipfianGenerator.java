@@ -299,7 +299,7 @@ public class ZipfianGenerator
 	public long nextLong()
 	{
 		long ret = nextLong(items);
-		//ret = base + FNVhash64(ret)%items;
+		ret = base + FNVhash64(ret)%items;
 		return ret;
 	}
 

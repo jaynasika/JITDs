@@ -1,4 +1,5 @@
 mode cracker
-splayInterval 1
-init 1000000
-seqread 10000
+splayInterval 100
+splayMethod median
+init 1000000 zipf
+seqread 1000

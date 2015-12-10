@@ -30,16 +30,16 @@ public class CompareSplayAffect {
 		KeyValueIterator.ZipfianIterator iter = new KeyValueIterator.ZipfianIterator(dataSize);
 		ArrayCog initcog = new ArrayCog(dataSize);
 		initcog.load(iter);
-		int numberOfReads = 1000;
+		int numberOfReads = 100;
 		List<Long> lowsList = new ArrayList<>(numberOfReads);		
 		for(int i = 0; i < numberOfReads; i++) {
 			lowsList.add(iter.randKey());
 		}
-		experiment(initcog, lowsList, readWidth, -1, "nosplay");
+		/*experiment(initcog, lowsList, readWidth, -1, "nosplay");
 		experiment(initcog, lowsList, readWidth, -1, "nosplay");
 		experiment(initcog, lowsList, readWidth, 100, "lowerBound");
 		experiment(initcog, lowsList, readWidth, 100, "median");
-		experiment(initcog, lowsList, readWidth, 500, "frequentItems");
+*/		experiment(initcog, lowsList, readWidth, 100, "frequentItems");
 	}
 
 	public static void reloadCogValues(ArrayCog src, ArrayCog dest) {
@@ -145,14 +145,16 @@ public class CompareSplayAffect {
 			if((i+1) % splayInterval == 0){					
 				long startsplaytime = System.nanoTime();
 				List<CountEntry<Long>> topk = ((CrackerMode)driver.mode).frequentItemsCounter.peek(20);
+				System.out.println(topk);
 				long key = low;
 				// print the items
-				for (int indx = 0; indx < topk.size(); indx++) {
+				for (int indx = topk.size() - 1; indx >=0 ; indx--) {
 					CountEntry<Long> item = topk.get(indx);
 					//System.out.println(item);
 					key = item.item;
 					driver.root = SplayBST.splayTheCog(driver.root,key);
 				}					
+				SplayBST.print("",true,driver.root);
 				long endsplaytime = System.nanoTime();
 				long splayTime = ((endsplaytime - startsplaytime))/1000;
 				splaytimer += splayTime;

@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 import org.astraldb.util.GetArgs;
 
 import jitd.SplayBST;
+import jitd.mfa.CountEntry;
+import jitd.mfa.FrequencyException;
+import jitd.mfa.LossyCounting;
 
 public class ScriptDriver {
 
@@ -17,14 +20,20 @@ public class ScriptDriver {
 
 	private static Logger log = 
 			org.apache.logging.log4j.LogManager.getLogger();
-	public StringBuffer graphString = new StringBuffer();
 	public Driver driver = new Driver(new Mode(), null);
-	boolean fixedMode = false;
-	int splayInterval = -1;
-	long totalSplayTime = 0;
 	KeyValueIterator rand;
 	long timer = 0, start = 0;
 	int op = 0;
+	boolean fixedMode = false;
+	
+	// Added variables for splay functionality and 
+	int splayInterval = -1;
+	String splayMethod = "";
+	long totalSplayTime = 0;
+	
+	// graphString is used as identifier for naming the graph
+	public StringBuffer graphString = new StringBuffer();
+	
 
 	public ArrayCog array(int size)
 	{
@@ -49,7 +58,7 @@ public class ScriptDriver {
 		log.info("Load: {} records", baseSize);
 		if ((distributionMode != null) &&
 				(distributionMode.equalsIgnoreCase("zipf"))) {
-			rand = new KeyValueIterator.ZipfianIterator();
+			rand = new KeyValueIterator.ZipfianIterator(baseSize);
 			graphString.append("zipf_");
 		} else {
 			rand = new KeyValueIterator.RandomIterator();
@@ -87,7 +96,30 @@ public class ScriptDriver {
 		KeyValueIterator iter = driver.scan(start, end);
 		endTime(LogType.READ);
 		log.trace("Record Count Is: {}", driver.root.length());
+	}
 
+	public void readWithMFA() {
+		readWithMFA(randKey());
+	}
+
+	public void readWithMFA(long start) {
+		readWithMFA(start, start + READ_WIDTH);
+	}
+
+	public void readWithMFA(long start, long end)
+	{		
+		op++;
+		log.info("Read for: {}--{}", start, end); 
+		startTime();
+		KeyValueIterator iter = driver.scan(start, end);
+		try {
+			((CrackerMode)driver.mode).frequentItemsCounter.add(start);
+		} catch (FrequencyException e) {
+			log.error("Error while adding item to frequentItemsCounter", e);
+			e.printStackTrace();
+		}
+		endTime(LogType.READ);
+		log.trace("Record Count Is: {}", driver.root.length());
 	}
 
 	public void seqRead(int count)
@@ -95,26 +127,72 @@ public class ScriptDriver {
 
 	public void seqRead(int count, long width)
 	{
-		if (splayInterval > -1) {
+		switch(splayMethod) {
+		case "lowerBound":
+			seqReadSplayMedianOrLowerBound(count, width, false);
+			break;
+		case "median": 
+			seqReadSplayMedianOrLowerBound(count, width, true);
+			break;
+		case "MFA":
+			//int counters = 20;
+			//double probabilityOfFailure = 0.2;
+			double support = 0.003;
+			double maxError = 0.003;
+			((CrackerMode)driver.mode).frequentItemsCounter = new LossyCounting<Long>(maxError);
+			seqReadSplayWithMFA(count, width, support);
+			break;
+		default:
+			splayMethod = "NoSplay";			
 			for(int i = 0; i < count; i++) {
-				long randkey =randKey();    	
-				read(randkey);
-				if(i>0 && i%splayInterval==0){
-					long startsplaytime = System.nanoTime();
-					long key = SplayBST.findMedianKey(driver.root, null);
-					driver.root = SplayBST.splayTheCog(driver.root,key);
-					long endsplaytime = System.nanoTime();
-					totalSplayTime = totalSplayTime + (endsplaytime - startsplaytime);
-				}    
+				long randKey =randKey();
+				read(randKey, randKey + width);
 			}
-		} else {
-			for(int i = 0; i < count; i++) {
-				long randkey =randKey();    	
-				read(randkey);
-			}
-		}
+		}		
 		graphString.append("seqRead_");
+		graphString.append(splayMethod + "_");
 		graphString.append(count);
+		System.out.println(graphString);
+	}
+
+	private void seqReadSplayWithMFA(int count, long width, double support) {
+		for(int i = 0; i < count; i++) {
+			long key = randKey();
+			readWithMFA(key, key + width);
+			if((i+1) % splayInterval == 0){					
+				long startsplaytime = System.nanoTime();
+				List<CountEntry<Long>> topk = ((CrackerMode)driver.mode).frequentItemsCounter.peek(10);
+				// System.out.println(topk);
+				// print the items
+				for (int indx = topk.size() - 1; indx >= 0 ; indx--) {
+					CountEntry<Long> item = topk.get(indx);
+					// System.out.print(item.item + " ");
+					key = item.item;
+					driver.root = SplayBST.splayTheCog(driver.root,key);
+				}					
+				long endsplaytime = System.nanoTime();
+				totalSplayTime += (endsplaytime - startsplaytime);
+			}    
+		}
+	}
+
+	private void seqReadSplayMedianOrLowerBound(int count, long width, boolean isMedian) {
+		for(int i = 0; i < count; i++) {
+			long key =randKey();    	
+			read(key, key + width);
+			if((i+1) % splayInterval == 0){
+				if (isMedian) {
+					key = SplayBST.findMedianKey(driver.root, ((CrackerMode)driver.mode).seperatorCount);
+				}
+				System.out.println("Before splay : " + ((BTreeCog)driver.root).sep);
+				long startsplaytime = System.nanoTime();
+				driver.root = SplayBST.splayTheCog(driver.root,key);
+				long endsplaytime = System.nanoTime();
+				System.out.println("splay key : " + key);
+				System.out.println("After splay : " + ((BTreeCog)driver.root).sep);
+				totalSplayTime += (endsplaytime - startsplaytime);
+			}    
+		}
 	}
 
 	public Mode modeForString(String mode){
@@ -221,12 +299,19 @@ public class ScriptDriver {
 		case "splayInterval":
 			setSplayInterval(Integer.parseInt(args[1]));
 			break;
+		case "splayMethod":
+			setSplayMethod(args[1]);
+			break;
 
 		default:
 			log.fatal("Unknown command '{}' ('{}')", args[0], cmd);
 			System.exit(-1);
 		}
 
+	}
+
+	private void setSplayMethod(String splayMethod) {
+		this.splayMethod = splayMethod;
 	}
 
 	public void execStream(Reader r)
